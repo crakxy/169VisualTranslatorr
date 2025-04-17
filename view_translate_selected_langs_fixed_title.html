@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>169 Translator Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0f0f0f 0%, #1e1e1e 50%, #2c0a0a 100%);
+       background-attachment: fixed;
+       overflow-x: hidden;
+      font-family: 'Inter', sans-serif;
+      color: #f1f1f1;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 3rem auto;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.4), inset 0 0 10px rgba(255, 0, 0, 0.2);
+      animation: fadeIn 0.9s ease-in-out, pulseGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      color: #ff3c3c;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .translated {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    .footer {
+      margin-top: 2rem;
+      text-align: left;
+      font-size: 0.85rem;
+      color: #aaa;
+      border-top: 1px solid #333;
+      padding-top: 1rem;
+    }
+
+    button {
+      background: #ff4c4c;
+      border: none;
+      color: white;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: #ff0000cc;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ff000044;
+    }
+  
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 25px rgba(255, 0, 0, 0.4), inset 0 0 10px rgba(255, 0, 0, 0.2); }
+      50% { box-shadow: 0 0 35px rgba(255, 0, 0, 0.6), inset 0 0 15px rgba(255, 0, 0, 0.3); }
+    }
+
+    h1 span {
+      transition: transform 0.3s ease;
+    }
+    h1 span:hover {
+      transform: scale(1.15);
+    }
+
+    .translated {
+      transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+    .translated:hover {
+      transform: translateY(-3px);
+      opacity: 0.95;
+    }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span id="flag">🌐</span> <span id="title">Translated Message</span> <span id="emoji">📝</span></h1>
+    <div id="translatedText" class="translated">Loading...</div>
+    <div class="footer">Powered by <strong>16:9 Visual</strong></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const text = decodeURIComponent(params.get("text") || "").replace(/\+/g, " ");
+    const lang = (params.get("lang") || "en").toLowerCase();
+
+    const flags = {
+  "fr": "('🇫🇷', 'Traduction Française', '📘')",
+      "en": "🇬🇧", "it": "🇮🇹", "es": "🇪🇸", "fr": "🇫🇷", "de": "🇩🇪", "pt": "🇵🇹", "jp": "🇯🇵", "cn": "🇨🇳",
+      "us": "🇺🇸", "kr": "🇰🇷", "sa": "🇸🇦", "pl": "🇵🇱", "ru": "🇷🇺", "tr": "🇹🇷", "nl": "🇳🇱", "gr": "🇬🇷",
+      "in": "🇮🇳", "id": "🇮🇩", "th": "🇹🇭"
+    };
+
+    const titles = {
+  "fr": "('🇵🇹', 'Tradução em Português', '📜')",
+      "en": "English Translation", "it": "Traduzione in Italiano", "es": "Traducción en Español",
+      "fr": "Traduction Française", "de": "Deutsche Übersetzung", "pt": "Tradução em Português",
+      "jp": "日本語訳", "cn": "中文翻译", "us": "American English", "kr": "한국어 번역", "sa": "الترجمة العربية",
+      "pl": "Polskie Tłumaczenie", "ru": "Русский перевод", "tr": "Türkçe Çeviri", "nl": "Nederlandse Vertaling",
+      "gr": "Ελληνική Μετάφραση", "in": "अनुवाद - हिन्दी", "id": "Terjemahan Bahasa Indonesia", "th": "คำแปลภาษาไทย"
+    };
+
+    const emojis = {
+  "fr": "('🇪🇸', 'Traducción en Español', '📄')",
+      "en": "📝", "it": "✍️", "es": "📄", "fr": "📘", "de": "📙", "pt": "📜", "jp": "🈶", "cn": "🈷️",
+      "us": "📘", "kr": "🈸", "sa": "📜", "pl": "📗", "ru": "📕", "tr": "📝", "nl": "📙", "gr": "📓",
+      "in": "📖", "id": "📚", "th": "📔"
+    };
+
+    document.getElementById("translatedText").textContent = text;
+    document.getElementById("flag").textContent = flags[lang] || "🌐";
+    document.getElementById("title").textContent = "16:9 Translator";
+    document.getElementById("emoji").textContent = emojis[lang] || "🌍";
+  </script>
+</body>
+</html>
